@@ -14,7 +14,7 @@ class QuebraCabeca(object):
         np.random.shuffle(self.tabuleiro)
 
     @staticmethod
-    def adjacente_vazio(vazio_i, vazio_j, peca_i, peca_j):
+    def __adjacente_vazio(vazio_i, vazio_j, peca_i, peca_j):
         if vazio_i == peca_i:
             if vazio_j == (peca_j + 1):
                 return True
@@ -31,7 +31,7 @@ class QuebraCabeca(object):
         vazio_i, vazio_j = np.where(self.tabuleiro == 0)
         peca_i, peca_j = np.where(self.tabuleiro == peca)
 
-        if self.adjacente_vazio(vazio_i[0], vazio_j[0], peca_i[0], peca_j[0]):
+        if self.__adjacente_vazio(vazio_i[0], vazio_j[0], peca_i[0], peca_j[0]):
             self.tabuleiro[vazio_i[0]][vazio_j[0]] = peca
             self.tabuleiro[peca_i[0]][peca_j[0]] = 0
             return True
@@ -90,7 +90,22 @@ def main():
             peca = int(input("Informe a peça que será movimentada: "))
             while not qb.mover(peca):
                 peca = int(input("Peça inválida, digite uma válida: "))
+
+        if platform.system() == "Linux":
+            os.system("clear")
+        else:
+            os.system("cls")
+
+        if qb.possui_solucao():
+            print("Essa instância possui solução.")
+        else:
+            print("Essa instância não possui solução.")
+
+        print(qb.montar_tabuleiro())
+        print("Parabéns você venceu!!!")
     except KeyboardInterrupt:
+        pass
+    finally:
         print("\nFechando o jogo...")
 
 
