@@ -12,6 +12,7 @@ class QuebraCabeca(object):
         self.dimensao = int(math.sqrt(self.TAMANHO_QUEBRA_CABECA + 1))
         self.tabuleiro = np.arange(self.TAMANHO_QUEBRA_CABECA + 1).reshape((self.dimensao, self.dimensao))
         np.random.shuffle(self.tabuleiro)
+        self.possui_solucao = self.__possui_solucao()
 
     @staticmethod
     def __adjacente_vazio(vazio_i, vazio_j, peca_i, peca_j):
@@ -46,7 +47,7 @@ class QuebraCabeca(object):
                 return False
         return True
 
-    def possui_solucao(self):
+    def __possui_solucao(self):
         count = 0
         temp = np.reshape(self.tabuleiro, -1)
         for i in range(self.TAMANHO_QUEBRA_CABECA):
@@ -80,7 +81,7 @@ def main():
             else:
                 os.system("cls")
 
-            if qb.possui_solucao():
+            if qb.possui_solucao:
                 print("Essa instância possui solução.")
             else:
                 print("Essa instância não possui solução.")
@@ -96,7 +97,7 @@ def main():
         else:
             os.system("cls")
 
-        if qb.possui_solucao():
+        if qb.possui_solucao:
             print("Essa instância possui solução.")
         else:
             print("Essa instância não possui solução.")
