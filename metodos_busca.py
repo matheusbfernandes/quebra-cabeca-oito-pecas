@@ -8,15 +8,18 @@ class No(object):
         self.no_pai = no_pai
         self.c_n = c_n
         self.h_n = h_n
-        self.c_total = self.computar_custo_total()
+        self.c_total = self._computar_custo_total()
 
-    def computar_custo_total(self):
+    def _computar_custo_total(self):
         if self.no_pai is None:
             return self.c_n
-        return self.no_pai.c_n + self.c_n
+        return self.no_pai.c_total + self.c_n
 
     def __lt__(self, other):
-        return self.c_total <= other.c_total
+        return self.c_total < other.c_total
+
+    def __eq__(self, other):
+        return self.c_total == other.c_total
 
 
 class BuscaCustoUniforme(object):

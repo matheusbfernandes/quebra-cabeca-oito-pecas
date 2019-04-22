@@ -80,10 +80,10 @@ def main():
     #     while sol:
     #         temp = sol.pop()
     #         print(temp.tabuleiro)
-    qb = QuebraCabeca()
+    #         print()
+    # qb = QuebraCabeca()
 
     try:
-
         while not qb.final_jogo():
             time.sleep(.05)
 
