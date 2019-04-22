@@ -1,8 +1,8 @@
-import numpy as np
 import math
 import os
 import time
 import platform
+from metodos_busca import *
 
 
 class QuebraCabeca(object):
@@ -12,10 +12,10 @@ class QuebraCabeca(object):
         self.dimensao = int(math.sqrt(self.TAMANHO_QUEBRA_CABECA + 1))
         self.tabuleiro = np.arange(self.TAMANHO_QUEBRA_CABECA + 1).reshape((self.dimensao, self.dimensao))
         np.random.shuffle(self.tabuleiro)
-        self.possui_solucao = self.__possui_solucao()
+        self.possui_solucao = self._possui_solucao()
 
     @staticmethod
-    def __adjacente_vazio(vazio_i, vazio_j, peca_i, peca_j):
+    def _adjacente_vazio(vazio_i, vazio_j, peca_i, peca_j):
         if vazio_i == peca_i:
             if vazio_j == (peca_j + 1):
                 return True
@@ -32,7 +32,7 @@ class QuebraCabeca(object):
         vazio_i, vazio_j = np.where(self.tabuleiro == 0)
         peca_i, peca_j = np.where(self.tabuleiro == peca)
 
-        if self.__adjacente_vazio(vazio_i[0], vazio_j[0], peca_i[0], peca_j[0]):
+        if self._adjacente_vazio(vazio_i[0], vazio_j[0], peca_i[0], peca_j[0]):
             self.tabuleiro[vazio_i[0]][vazio_j[0]] = peca
             self.tabuleiro[peca_i[0]][peca_j[0]] = 0
             return True
@@ -47,7 +47,7 @@ class QuebraCabeca(object):
                 return False
         return True
 
-    def __possui_solucao(self):
+    def _possui_solucao(self):
         count = 0
         temp = np.reshape(self.tabuleiro, -1)
         for i in range(self.TAMANHO_QUEBRA_CABECA):
@@ -70,9 +70,20 @@ class QuebraCabeca(object):
 
 
 def main():
+    # solver = BuscaCustoUniforme(np.array([[0, 1, 2],
+    #                                       [4, 5, 3],
+    #                                       [7, 8, 6]]))
+    # sol = solver.buscar_solucao()
+    # if sol == "ERRO":
+    #     print(sol)
+    # else:
+    #     while sol:
+    #         temp = sol.pop()
+    #         print(temp.tabuleiro)
     qb = QuebraCabeca()
 
     try:
+
         while not qb.final_jogo():
             time.sleep(.05)
 
