@@ -1,120 +1,43 @@
-import math
 import os
 import time
 import platform
 from metodos_busca import *
+from quebra_cabeca import QuebraCabeca
 
 
-class QuebraCabeca(object):
-    TAMANHO_QUEBRA_CABECA = 8
-
-    def __init__(self):
-        self.dimensao = int(math.sqrt(self.TAMANHO_QUEBRA_CABECA + 1))
-        self.tabuleiro = np.arange(self.TAMANHO_QUEBRA_CABECA + 1).reshape((self.dimensao, self.dimensao))
-        np.random.shuffle(self.tabuleiro)
-        self.possui_solucao = self._possui_solucao()
-
-    @staticmethod
-    def _adjacente_vazio(vazio_i, vazio_j, peca_i, peca_j):
-        if vazio_i == peca_i:
-            if vazio_j == (peca_j + 1):
-                return True
-            elif vazio_j == (peca_j - 1):
-                return True
-        elif vazio_j == peca_j:
-            if vazio_i == (peca_i + 1):
-                return True
-            elif vazio_i == (peca_i - 1):
-                return True
-        return False
-
-    def mover(self, peca):
-        vazio_i, vazio_j = np.where(self.tabuleiro == 0)
-        peca_i, peca_j = np.where(self.tabuleiro == peca)
-
-        if self._adjacente_vazio(vazio_i[0], vazio_j[0], peca_i[0], peca_j[0]):
-            self.tabuleiro[vazio_i[0]][vazio_j[0]] = peca
-            self.tabuleiro[peca_i[0]][peca_j[0]] = 0
-            return True
-
-        return False
-
-    def final_jogo(self):
-        temp = np.reshape(self.tabuleiro, -1)
-
-        for i in range(temp.shape[0] - 2):
-            if temp[i + 1] < temp[i]:
-                return False
-        return True
-
-    def _possui_solucao(self):
-        count = 0
-        temp = np.reshape(self.tabuleiro, -1)
-        for i in range(self.TAMANHO_QUEBRA_CABECA):
-            for j in range(i + 1, self.TAMANHO_QUEBRA_CABECA + 1):
-                if (temp[i] > 0) and (temp[j] > 0) and (temp[i] > temp[j]):
-                    count += 1
-
-        return (count % 2) == 0
-
-    def montar_tabuleiro(self):
-        s = ""
-        for i in range(self.tabuleiro.shape[0]):
-            s += "+{}+\n|".format('-' * (self.TAMANHO_QUEBRA_CABECA + 3))
-            for j in range(self.tabuleiro.shape[1]):
-                s += " {:d} |".format(self.tabuleiro[i][j])
-            s += "\n"
-        s += "+{}+".format('-' * (self.TAMANHO_QUEBRA_CABECA + 3))
-
-        return s
+def limpar_tela():
+    if platform.system() == "Linux":
+        os.system("clear")
+    else:
+        os.system("cls")
 
 
 def main():
-    # solver = BuscaCustoUniforme(np.array([[0, 1, 2],
-    #                                       [4, 5, 3],
-    #                                       [7, 8, 6]]))
-    # sol = solver.buscar_solucao()
-    # if sol == "ERRO":
-    #     print(sol)
-    # else:
-    #     while sol:
-    #         temp = sol.pop()
-    #         print(temp.tabuleiro)
-    #         print()
-    # qb = QuebraCabeca()
-
     try:
-        while not qb.final_jogo():
-            time.sleep(.05)
-
-            if platform.system() == "Linux":
-                os.system("clear")
+        continuar_resolvendo = True
+        while continuar_resolvendo:
+            qc = QuebraCabeca()
+            solucionador = BuscaCustoUniforme(qc.tabuleiro)
+            passos = solucionador.buscar_solucao()
+            if passos == "ERRO":
+                print("Essa instância do jogo não possui solução.\n")
             else:
-                os.system("cls")
-
-            if qb.possui_solucao:
-                print("Essa instância possui solução.")
-            else:
-                print("Essa instância não possui solução.")
-
-            print(qb.montar_tabuleiro())
-
-            peca = int(input("Informe a peça que será movimentada: "))
-            while not qb.mover(peca):
-                peca = int(input("Peça inválida, digite uma válida: "))
-
-        if platform.system() == "Linux":
-            os.system("clear")
-        else:
-            os.system("cls")
-
-        if qb.possui_solucao:
-            print("Essa instância possui solução.")
-        else:
-            print("Essa instância não possui solução.")
-
-        print(qb.montar_tabuleiro())
-        print("Parabéns você venceu!!!")
+                conf_inicial = passos.pop()
+                tabuleiro_inicial = qc.montar_tabuleiro(conf_inicial.tabuleiro)
+                cont = 1
+                while passos:
+                    time.sleep(.05)
+                    limpar_tela()
+                    print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
+                    temp = passos.pop()
+                    print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(cont, qc.montar_tabuleiro(temp.tabuleiro), ('#' * 13)))
+                    input("Pressione qualquer tecla para continuar.\n")
+                    cont += 1
+            resposta = 'inf'
+            while resposta != 's' and resposta != 'n':
+                resposta = input("Resolver outro quebra cabeça? (s ou n): ")
+            if resposta == 'n':
+                continuar_resolvendo = False
     except KeyboardInterrupt:
         pass
     finally:
