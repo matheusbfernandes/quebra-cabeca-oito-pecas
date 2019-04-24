@@ -8,7 +8,7 @@ class No(object):
         self.no_pai = no_pai
         self.custo_parcial = custo_parcial
         self.custo_huristico = custo_huristico
-        self.custo_total = self._computar_custo()
+        self.custo_total = self._computar_custo_total()
 
     def __lt__(self, other):
         return self.custo_total < other.custo_total
@@ -18,11 +18,6 @@ class No(object):
 
     def _computar_custo_total(self):
         return self.custo_parcial + self.custo_huristico
-
-    def _computar_custo(self):
-        if self.no_pai is None:
-            return self.custo_parcial
-        return self.no_pai.custo_total + self.custo_parcial
 
 
 class BuscaCustoUniforme(object):
@@ -40,9 +35,6 @@ class BuscaCustoUniforme(object):
     def _final_jogo(self, tabuleiro_atual):
         return np.all(self.TABULEIRO_FINAL == tabuleiro_atual)
 
-    def _calcular_custo(self, temp):
-        return 9 - np.sum((self.TABULEIRO_FINAL == temp).astype(int))
-
     def _get_filhos(self, estado_atual):
         vazio_i, vazio_j = np.where(estado_atual.tabuleiro == 0)
         no_filhos = PriorityQueue()
@@ -51,28 +43,28 @@ class BuscaCustoUniforme(object):
             temp = np.copy(estado_atual.tabuleiro)
             temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] - 1][vazio_j[0]]
             temp[vazio_i[0] - 1][vazio_j[0]] = 0
-            novo_no = No(temp, estado_atual, self._calcular_custo(temp))
+            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1)
             no_filhos.put((novo_no.custo_parcial, novo_no))
 
         if (vazio_i + 1) < self.TABULEIRO_FINAL.shape[0]:
             temp = np.copy(estado_atual.tabuleiro)
             temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] + 1][vazio_j[0]]
             temp[vazio_i[0] + 1][vazio_j[0]] = 0
-            novo_no = No(temp, estado_atual, self._calcular_custo(temp))
+            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1)
             no_filhos.put((novo_no.custo_parcial, novo_no))
 
         if (vazio_j - 1) >= 0:
             temp = np.copy(estado_atual.tabuleiro)
             temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] - 1]
             temp[vazio_i[0]][vazio_j[0] - 1] = 0
-            novo_no = No(temp, estado_atual, self._calcular_custo(temp))
+            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1)
             no_filhos.put((novo_no.custo_parcial, novo_no))
 
         if (vazio_j + 1) < self.TABULEIRO_FINAL.shape[0]:
             temp = np.copy(estado_atual.tabuleiro)
             temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] + 1]
             temp[vazio_i[0]][vazio_j[0] + 1] = 0
-            novo_no = No(temp, estado_atual, self._calcular_custo(temp))
+            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1)
             no_filhos.put((novo_no.custo_parcial, novo_no))
 
         return no_filhos
@@ -115,10 +107,16 @@ class AEstrela(object):
 
         self.visitados = []
         self.nao_visitados = PriorityQueue()
-        self.nao_visitados.put((no_inicial.custo_total, no_inicial))
+        self.nao_visitados.put((no_inicial.custo_parcial, no_inicial))
 
     def _custo_heuristico(self, temp):
-        return 9 - np.sum((self.TABULEIRO_FINAL == temp).astype(int))
+        custo = 0
+        for elem in range(9):
+            pos_i, pos_j = np.where(temp == elem)
+            final_i, final_j = np.where(self.TABULEIRO_FINAL == elem)
+            custo += abs(final_i[0] - pos_i[0]) + abs(final_j[0] - pos_j[0])
+
+        return custo
 
     def _final_jogo(self, tabuleiro_atual):
         return np.all(self.TABULEIRO_FINAL == tabuleiro_atual)
@@ -132,7 +130,7 @@ class AEstrela(object):
             temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] - 1][vazio_j[0]]
             temp[vazio_i[0] - 1][vazio_j[0]] = 0
 
-            novo_no = No(temp, estado_atual, 1, self._custo_heuristico(temp))
+            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1, self._custo_heuristico(temp))
             no_filhos.put((novo_no.custo_total, novo_no))
 
         if (vazio_i + 1) < self.TABULEIRO_FINAL.shape[0]:
@@ -140,7 +138,7 @@ class AEstrela(object):
             temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] + 1][vazio_j[0]]
             temp[vazio_i[0] + 1][vazio_j[0]] = 0
 
-            novo_no = No(temp, estado_atual, 1, self._custo_heuristico(temp))
+            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1, self._custo_heuristico(temp))
             no_filhos.put((novo_no.custo_total, novo_no))
 
         if (vazio_j - 1) >= 0:
@@ -148,7 +146,7 @@ class AEstrela(object):
             temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] - 1]
             temp[vazio_i[0]][vazio_j[0] - 1] = 0
 
-            novo_no = No(temp, estado_atual, 1, self._custo_heuristico(temp))
+            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1, self._custo_heuristico(temp))
             no_filhos.put((novo_no.custo_total, novo_no))
 
         if (vazio_j + 1) < self.TABULEIRO_FINAL.shape[0]:
@@ -156,7 +154,7 @@ class AEstrela(object):
             temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] + 1]
             temp[vazio_i[0]][vazio_j[0] + 1] = 0
 
-            novo_no = No(temp, estado_atual, 1, self._custo_heuristico(temp))
+            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1, self._custo_heuristico(temp))
             no_filhos.put((novo_no.custo_total, novo_no))
 
         return no_filhos
