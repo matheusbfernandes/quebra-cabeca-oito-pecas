@@ -32,12 +32,50 @@ class MetodoBusca(object):
         self.nao_visitados = PriorityQueue()
         self.nao_visitados.put((no_inicial.custo_parcial, no_inicial))
 
-    @abc.abstractmethod
-    def get_filhos(self, estado_atual):
-        pass
-
     def _final_jogo(self, tabuleiro_atual):
         return np.all(self.TABULEIRO_FINAL == tabuleiro_atual)
+
+    @abc.abstractmethod
+    def alocar_novo_no(self, tabuleiro, no_pai):
+        pass
+
+    def get_filhos(self, estado_atual):
+        vazio_i, vazio_j = np.where(estado_atual.tabuleiro == 0)
+        no_filhos = PriorityQueue()
+
+        if (vazio_i - 1) >= 0:
+            temp = np.copy(estado_atual.tabuleiro)
+            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] - 1][vazio_j[0]]
+            temp[vazio_i[0] - 1][vazio_j[0]] = 0
+
+            novo_no = self.alocar_novo_no(temp, estado_atual)
+            no_filhos.put((novo_no.custo_total, novo_no))
+
+        if (vazio_i + 1) < self.TABULEIRO_FINAL.shape[0]:
+            temp = np.copy(estado_atual.tabuleiro)
+            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] + 1][vazio_j[0]]
+            temp[vazio_i[0] + 1][vazio_j[0]] = 0
+
+            novo_no = self.alocar_novo_no(temp, estado_atual)
+            no_filhos.put((novo_no.custo_total, novo_no))
+
+        if (vazio_j - 1) >= 0:
+            temp = np.copy(estado_atual.tabuleiro)
+            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] - 1]
+            temp[vazio_i[0]][vazio_j[0] - 1] = 0
+
+            novo_no = self.alocar_novo_no(temp, estado_atual)
+            no_filhos.put((novo_no.custo_total, novo_no))
+
+        if (vazio_j + 1) < self.TABULEIRO_FINAL.shape[0]:
+            temp = np.copy(estado_atual.tabuleiro)
+            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] + 1]
+            temp[vazio_i[0]][vazio_j[0] + 1] = 0
+
+            novo_no = self.alocar_novo_no(temp, estado_atual)
+            no_filhos.put((novo_no.custo_total, novo_no))
+
+        return no_filhos
 
     def buscar_solucao(self):
         while True:
@@ -72,39 +110,8 @@ class BuscaCustoUniforme(MetodoBusca):
         no_inicial = No(tabuleiro_inicial, None, 0)
         super().__init__(no_inicial, "Busca de custo uniforme")
 
-    def get_filhos(self, estado_atual):
-        vazio_i, vazio_j = np.where(estado_atual.tabuleiro == 0)
-        no_filhos = PriorityQueue()
-
-        if (vazio_i - 1) >= 0:
-            temp = np.copy(estado_atual.tabuleiro)
-            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] - 1][vazio_j[0]]
-            temp[vazio_i[0] - 1][vazio_j[0]] = 0
-            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1)
-            no_filhos.put((novo_no.custo_parcial, novo_no))
-
-        if (vazio_i + 1) < self.TABULEIRO_FINAL.shape[0]:
-            temp = np.copy(estado_atual.tabuleiro)
-            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] + 1][vazio_j[0]]
-            temp[vazio_i[0] + 1][vazio_j[0]] = 0
-            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1)
-            no_filhos.put((novo_no.custo_parcial, novo_no))
-
-        if (vazio_j - 1) >= 0:
-            temp = np.copy(estado_atual.tabuleiro)
-            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] - 1]
-            temp[vazio_i[0]][vazio_j[0] - 1] = 0
-            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1)
-            no_filhos.put((novo_no.custo_parcial, novo_no))
-
-        if (vazio_j + 1) < self.TABULEIRO_FINAL.shape[0]:
-            temp = np.copy(estado_atual.tabuleiro)
-            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] + 1]
-            temp[vazio_i[0]][vazio_j[0] + 1] = 0
-            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1)
-            no_filhos.put((novo_no.custo_parcial, novo_no))
-
-        return no_filhos
+    def alocar_novo_no(self, tabuleiro, no_pai):
+        return No(tabuleiro, no_pai, no_pai.custo_parcial + 1)
 
 
 class AEstrela(MetodoBusca):
@@ -121,40 +128,5 @@ class AEstrela(MetodoBusca):
 
         return custo
 
-    def get_filhos(self, estado_atual):
-        vazio_i, vazio_j = np.where(estado_atual.tabuleiro == 0)
-        no_filhos = PriorityQueue()
-
-        if (vazio_i - 1) >= 0:
-            temp = np.copy(estado_atual.tabuleiro)
-            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] - 1][vazio_j[0]]
-            temp[vazio_i[0] - 1][vazio_j[0]] = 0
-
-            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1, self._custo_heuristico(temp))
-            no_filhos.put((novo_no.custo_total, novo_no))
-
-        if (vazio_i + 1) < self.TABULEIRO_FINAL.shape[0]:
-            temp = np.copy(estado_atual.tabuleiro)
-            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0] + 1][vazio_j[0]]
-            temp[vazio_i[0] + 1][vazio_j[0]] = 0
-
-            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1, self._custo_heuristico(temp))
-            no_filhos.put((novo_no.custo_total, novo_no))
-
-        if (vazio_j - 1) >= 0:
-            temp = np.copy(estado_atual.tabuleiro)
-            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] - 1]
-            temp[vazio_i[0]][vazio_j[0] - 1] = 0
-
-            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1, self._custo_heuristico(temp))
-            no_filhos.put((novo_no.custo_total, novo_no))
-
-        if (vazio_j + 1) < self.TABULEIRO_FINAL.shape[0]:
-            temp = np.copy(estado_atual.tabuleiro)
-            temp[vazio_i[0]][vazio_j[0]] = temp[vazio_i[0]][vazio_j[0] + 1]
-            temp[vazio_i[0]][vazio_j[0] + 1] = 0
-
-            novo_no = No(temp, estado_atual, estado_atual.custo_parcial + 1, self._custo_heuristico(temp))
-            no_filhos.put((novo_no.custo_total, novo_no))
-
-        return no_filhos
+    def alocar_novo_no(self, tabuleiro, no_pai):
+        return No(tabuleiro, no_pai, no_pai.custo_parcial + 1, self._custo_heuristico(tabuleiro))
