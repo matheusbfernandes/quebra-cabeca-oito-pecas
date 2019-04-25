@@ -4,14 +4,16 @@ import math
 
 class QuebraCabeca(object):
     TAMANHO_QUEBRA_CABECA = 8
+
     CONFIG_FINAL = np.array([[1, 2, 3],
                              [8, 0, 4],
                              [7, 6, 5]])
 
     def __init__(self):
         self.dimensao = int(math.sqrt(self.TAMANHO_QUEBRA_CABECA + 1))
+
         self.tabuleiro = np.arange(self.TAMANHO_QUEBRA_CABECA + 1).reshape((self.dimensao, self.dimensao))
-        np.random.shuffle(self.tabuleiro)
+        np.random.shuffle(self.tabuleiro.flat)
         while not self._possui_solucao():
             np.random.shuffle(self.tabuleiro)
 
@@ -28,6 +30,9 @@ class QuebraCabeca(object):
             elif vazio_i == (peca_i - 1):
                 return True
         return False
+
+    def calcular_complexidade(self):
+        return np.sum((self.CONFIG_FINAL == self.tabuleiro).astype(int))
 
     def mover(self, peca):
         vazio_i, vazio_j = np.where(self.tabuleiro == 0)
@@ -63,10 +68,10 @@ class QuebraCabeca(object):
 
         s = ""
         for i in range(instancia.shape[0]):
-            s += "+{}+\n|".format('-' * (self.TAMANHO_QUEBRA_CABECA + 3))
+            s += "{}+\n|".format('+---' * 3)
             for j in range(instancia.shape[1]):
                 s += " {:d} |".format(instancia[i][j])
             s += "\n"
-        s += "+{}+".format('-' * (self.TAMANHO_QUEBRA_CABECA + 3))
+        s += "{}+".format('+---' * 3)
 
         return s

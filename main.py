@@ -16,8 +16,11 @@ def main():
         continuar_resolvendo = True
         while continuar_resolvendo:
             qc = QuebraCabeca()
-            print("Resolvendo, por favor aguarde...")
-            solucionador = BuscaCustoUniforme(qc.tabuleiro)
+            if qc.calcular_complexidade() > 3:
+                solucionador = BuscaCustoUniforme(qc.tabuleiro)
+            else:
+                solucionador = AEstrela(qc.tabuleiro)
+            print("Resolvendo utilizando o método: {:s}\nPor favor aguarde...".format(solucionador.nome))
             passos = solucionador.buscar_solucao()
             if passos == "ERRO":
                 print("Essa instância do jogo não possui solução.\n")
@@ -25,12 +28,14 @@ def main():
                 conf_inicial = passos.pop()
                 tabuleiro_inicial = qc.montar_tabuleiro(conf_inicial.tabuleiro)
                 limpar_tela()
+                print("Quebra-cabeça resolvido utilizando o  método: {:s}".format(solucionador.nome))
                 print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
                 print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(1, tabuleiro_inicial, ('#' * 13)))
                 input("Pressione ENTER para continuar.\n")
                 cont = 2
                 while passos:
                     limpar_tela()
+                    print("Quebra-cabeça resolvido utilizando o método: {:s}".format(solucionador.nome))
                     print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
                     temp = passos.pop()
                     print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(cont, qc.montar_tabuleiro(temp.tabuleiro), ('#' * 13)))
