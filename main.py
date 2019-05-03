@@ -10,7 +10,7 @@ class InferfaceUsuario(object):
         self.opcoes_selecionadas = {"Op1": [1, 0],
                                     "Op2": False,
                                     "Op3": 600.0,
-                                    "Op4": None}
+                                    "Op4": 100}
 
     @staticmethod
     def limpar_tela():
@@ -95,32 +95,72 @@ def main():
             iu = InferfaceUsuario()
             iu.interface_escolhas()
             qc = QuebraCabeca(iu.opcoes_selecionadas["Op1"])
-            print(qc.montar_tabuleiro())
-    #         if qc.calcular_complexidade() > 3:
-    #             solucionador = BuscaCustoUniforme(qc.tabuleiro)
-    #         else:
-    #             solucionador = AEstrela(qc.tabuleiro)
-    #         print("Resolvendo utilizando o método: {:s}\nPor favor aguarde...".format(solucionador.nome))
-    #         passos = solucionador.buscar_solucao()
-    #         if passos == "ERRO":
-    #             print("Essa instância do jogo não possui solução.\n")
-    #         else:
-    #             conf_inicial = passos.pop()
-    #             tabuleiro_inicial = qc.montar_tabuleiro(conf_inicial.tabuleiro)
-    #             limpar_tela()
-    #             print("Quebra-cabeça resolvido utilizando o  método: {:s}".format(solucionador.nome))
-    #             print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
-    #             print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(1, tabuleiro_inicial, ('#' * 13)))
-    #             input("Pressione ENTER para continuar.\n")
-    #             cont = 2
-    #             while passos:
-    #                 limpar_tela()
-    #                 print("Quebra-cabeça resolvido utilizando o método: {:s}".format(solucionador.nome))
-    #                 print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
-    #                 temp = passos.pop()
-    #                 print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(cont, qc.montar_tabuleiro(temp.tabuleiro), ('#' * 13)))
-    #                 input("Pressione ENTER para continuar.\n")
-    #                 cont += 1
+            if iu.opcoes_selecionadas["Op2"]:
+                solucionador = BuscaCustoUniforme(qc.tabuleiro, iu.opcoes_selecionadas["Op3"], iu.opcoes_selecionadas["Op4"])
+            elif (iu.opcoes_selecionadas["Op1"][0] == 2) and (iu.opcoes_selecionadas["Op3"] > 50) and (iu.opcoes_selecionadas["Op4"] > 30):
+                solucionador = BuscaCustoUniforme(qc.tabuleiro, iu.opcoes_selecionadas["Op3"], iu.opcoes_selecionadas["Op4"])
+            else:
+                solucionador = AEstrela(qc.tabuleiro, iu.opcoes_selecionadas["Op3"], iu.opcoes_selecionadas["Op4"])
+            iu.limpar_tela()
+            print("Resolvendo utilizando o método: {:s}\nPor favor aguarde...".format(solucionador.nome))
+            cod, passos = solucionador.buscar_solucao()
+            if cod == "ERRO":
+                print("\nEssa instância do jogo não possui solução.\n")
+            elif cod == "TEMP_MAX":
+                conf_inicial = passos.pop()
+                tabuleiro_inicial = qc.montar_tabuleiro(conf_inicial.tabuleiro)
+                iu.limpar_tela()
+                print("Tempo máximo estourado, exibindo até onde foi possível resolver.\n")
+                print("Quebra-cabeça parcialmente resolvido utilizando o método: {:s}".format(solucionador.nome))
+                print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
+                print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(1, tabuleiro_inicial, ('#' * 13)))
+                input("Pressione ENTER para continuar.\n")
+                cont = 2
+                while passos:
+                    iu.limpar_tela()
+                    print("Tempo máximo estourado, exibindo até onde foi possível resolver.\n")
+                    print("Quebra-cabeça parcialmente resolvido utilizando o método: {:s}".format(solucionador.nome))
+                    print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
+                    temp = passos.pop()
+                    print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(cont, qc.montar_tabuleiro(temp.tabuleiro), ('#' * 13)))
+                    input("Pressione ENTER para continuar.\n")
+                    cont += 1
+            elif cod == "LIM_MAX":
+                conf_inicial = passos.pop()
+                tabuleiro_inicial = qc.montar_tabuleiro(conf_inicial.tabuleiro)
+                iu.limpar_tela()
+                print("Limite máximo de movimentações estourado, exibindo até onde foi possível resolver.\n")
+                print("Quebra-cabeça parcialmente resolvido utilizando o método: {:s}".format(solucionador.nome))
+                print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
+                print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(1, tabuleiro_inicial, ('#' * 13)))
+                input("Pressione ENTER para continuar.\n")
+                cont = 2
+                while passos:
+                    iu.limpar_tela()
+                    print("Limite máximo de movimentações estourado, exibindo até onde foi possível resolver.\n")
+                    print("Quebra-cabeça parcialmente resolvido utilizando o método: {:s}".format(solucionador.nome))
+                    print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
+                    temp = passos.pop()
+                    print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(cont, qc.montar_tabuleiro(temp.tabuleiro), ('#' * 13)))
+                    input("Pressione ENTER para continuar.\n")
+                    cont += 1
+            elif cod == "CONCLUIDO":
+                conf_inicial = passos.pop()
+                tabuleiro_inicial = qc.montar_tabuleiro(conf_inicial.tabuleiro)
+                iu.limpar_tela()
+                print("Quebra-cabeça resolvido utilizando o método: {:s}".format(solucionador.nome))
+                print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
+                print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(1, tabuleiro_inicial, ('#' * 13)))
+                input("Pressione ENTER para continuar.\n")
+                cont = 2
+                while passos:
+                    iu.limpar_tela()
+                    print("Quebra-cabeça resolvido utilizando o método: {:s}".format(solucionador.nome))
+                    print("Configuração inicial:\n{:s}\n\n{:s}\n".format(tabuleiro_inicial, ('#' * 13)))
+                    temp = passos.pop()
+                    print("Configuração {:d}:\n{:s}\n\n{:s}\n".format(cont, qc.montar_tabuleiro(temp.tabuleiro), ('#' * 13)))
+                    input("Pressione ENTER para continuar.\n")
+                    cont += 1
             resposta = 'inf'
             while resposta != 's' and resposta != 'n':
                 resposta = input("Resolver outro quebra cabeça? ('s' ou 'n'): ")
