@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import random
 
 
 class QuebraCabeca(object):
@@ -9,46 +10,35 @@ class QuebraCabeca(object):
                              [8, 0, 4],
                              [7, 6, 5]])
 
-    def __init__(self):
+    def __init__(self, tipo_tabuleiro):
         self.dimensao = int(math.sqrt(self.TAMANHO_QUEBRA_CABECA + 1))
 
-        self.tabuleiro = np.arange(self.TAMANHO_QUEBRA_CABECA + 1).reshape((self.dimensao, self.dimensao))
-        np.random.shuffle(self.tabuleiro.flat)
-        while not self._possui_solucao():
-            np.random.shuffle(self.tabuleiro)
+        if tipo_tabuleiro[0] == 1:
+            self.tabuleiro = np.arange(self.TAMANHO_QUEBRA_CABECA + 1).reshape((self.dimensao, self.dimensao))
+            np.random.shuffle(self.tabuleiro.flat)
+            while not self._possui_solucao():
+                np.random.shuffle(self.tabuleiro)
+        else:
+            self.tabuleiro = np.copy(self.CONFIG_FINAL)
+            for i in range(tipo_tabuleiro[1]):
+                vazio_i, vazio_j = np.where(self.tabuleiro == 0)
+                pecas = self._adjacente_vazio(vazio_i[0], vazio_j[0])
+                peca_aleatoria = random.choice(pecas)
+                peca_i, peca_j = np.where(self.tabuleiro == peca_aleatoria)
+                self.tabuleiro[vazio_i[0]][vazio_j[0]] = peca_aleatoria
+                self.tabuleiro[peca_i[0]][peca_j[0]] = 0
 
-    @staticmethod
-    def _adjacente_vazio(vazio_i, vazio_j, peca_i, peca_j):
-        if vazio_i == peca_i:
-            if vazio_j == (peca_j + 1):
-                return True
-            elif vazio_j == (peca_j - 1):
-                return True
-        elif vazio_j == peca_j:
-            if vazio_i == (peca_i + 1):
-                return True
-            elif vazio_i == (peca_i - 1):
-                return True
-        return False
-
-    def calcular_complexidade(self):
-        return np.sum((self.CONFIG_FINAL == self.tabuleiro).astype(int))
-
-    def mover(self, peca):
-        vazio_i, vazio_j = np.where(self.tabuleiro == 0)
-        peca_i, peca_j = np.where(self.tabuleiro == peca)
-
-        if self._adjacente_vazio(vazio_i[0], vazio_j[0], peca_i[0], peca_j[0]):
-            self.tabuleiro[vazio_i[0]][vazio_j[0]] = peca
-            self.tabuleiro[peca_i[0]][peca_j[0]] = 0
-            return True
-
-        return False
-
-    def final_jogo(self):
-        if np.all(self.CONFIG_FINAL == self.tabuleiro):
-            return True
-        return False
+    def _adjacente_vazio(self, vazio_i, vazio_j):
+        pecas = []
+        if (vazio_i + 1) < 3:
+            pecas.append(self.tabuleiro[vazio_i + 1][vazio_j])
+        if (vazio_i - 1) >= 0:
+            pecas.append(self.tabuleiro[vazio_i - 1][vazio_j])
+        if (vazio_j + 1) < 3:
+            pecas.append(self.tabuleiro[vazio_i][vazio_j + 1])
+        if (vazio_j - 1) >= 0:
+            pecas.append(self.tabuleiro[vazio_i][vazio_j - 1])
+        return pecas
 
     def _possui_solucao(self):
         count = 0

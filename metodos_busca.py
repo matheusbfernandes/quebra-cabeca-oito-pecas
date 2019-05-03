@@ -30,7 +30,7 @@ class MetodoBusca(object):
         self.nome = nome
         self.visitados = []
         self.nao_visitados = PriorityQueue()
-        self.nao_visitados.put((no_inicial.custo_parcial, no_inicial))
+        self.nao_visitados.put((no_inicial.custo_total, no_inicial))
 
     def _final_jogo(self, tabuleiro_atual):
         return np.all(self.TABULEIRO_FINAL == tabuleiro_atual)
